@@ -1,0 +1,1309 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Partage Vacances</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f2ea;
+      --ink: #202124;
+      --muted: #686057;
+      --line: #ddd4c5;
+      --panel: #fffaf2;
+      --panel-2: #ece7dc;
+      --accent: #0b6f6a;
+      --accent-ink: #ffffff;
+      --warm: #b84a32;
+      --good: #176c43;
+      --bad: #a33a2d;
+      --shadow: 0 16px 36px rgba(46, 35, 23, .12);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      background: #29231e;
+      color: #fdf8ef;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 8px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.05;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 0;
+      color: #d7cbb9;
+      line-height: 1.45;
+    }
+
+    .trip-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .trip-card label,
+    .field label,
+    .check-group legend {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .sidebar .trip-card label {
+      color: #d7cbb9;
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 11px 12px;
+      outline-color: var(--accent);
+    }
+
+    .textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    .sidebar .input {
+      background: #3a332c;
+      border-color: #574b40;
+      color: #fffaf2;
+    }
+
+    .sidebar .input::placeholder {
+      color: #bdaF9d;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      border: 0;
+      border-radius: var(--radius);
+      background: transparent;
+      color: #fdf8ef;
+      text-align: left;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .nav button[aria-selected="true"] {
+      background: #fdf8ef;
+      color: #29231e;
+    }
+
+    .pill {
+      min-width: 28px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: rgba(255, 255, 255, .14);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .nav button[aria-selected="true"] .pill {
+      background: #e3d8c6;
+    }
+
+    .side-actions {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .main {
+      padding: 24px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .title-block h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .title-block p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .toolbar,
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 10px 12px;
+      min-height: 42px;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: inherit;
+    }
+
+    .btn.danger {
+      color: var(--bad);
+      border-color: rgba(163, 58, 45, .35);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .stat {
+      display: grid;
+      gap: 5px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .stat strong {
+      font-size: 26px;
+      line-height: 1.05;
+    }
+
+    .section {
+      display: none;
+      gap: 16px;
+    }
+
+    .section.active {
+      display: grid;
+    }
+
+    .layout-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+    }
+
+    .check-group {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 9px;
+      min-width: 0;
+    }
+
+    .check span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .empty {
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: rgba(255, 250, 242, .55);
+      line-height: 1.45;
+    }
+
+    .expense,
+    .person,
+    .settlement {
+      display: grid;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0;
+    }
+
+    .expense:last-child,
+    .person:last-child,
+    .settlement:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .item-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .item-head strong {
+      font-size: 17px;
+    }
+
+    .meta,
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .money {
+      white-space: nowrap;
+      font-weight: 800;
+    }
+
+    .positive {
+      color: var(--good);
+    }
+
+    .negative {
+      color: var(--bad);
+    }
+
+    .balance-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .balance-row:last-child {
+      border-bottom: 0;
+    }
+
+    .bar {
+      height: 9px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      overflow: hidden;
+      margin-top: 7px;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      border-radius: inherit;
+    }
+
+    .tabs-mobile {
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #29231e;
+      color: #fffaf2;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      max-width: min(360px, calc(100vw - 32px));
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hidden-file {
+      display: none;
+    }
+
+    .fab {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding-bottom: calc(74px + env(safe-area-inset-bottom));
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+        gap: 12px;
+      }
+
+      .brand h1 {
+        font-size: 21px;
+      }
+
+      .brand p {
+        display: none;
+      }
+
+      .trip-card {
+        gap: 6px;
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .side-actions {
+        margin-top: 0;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .side-actions .btn {
+        min-height: 38px;
+        padding: 8px 10px;
+      }
+
+      .tabs-mobile {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 5px;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(246, 242, 234, .96);
+        border-top: 1px solid var(--line);
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+        z-index: 8;
+        backdrop-filter: blur(12px);
+      }
+
+      .tabs-mobile button {
+        min-height: 46px;
+        padding: 7px 6px;
+        font-size: 12px;
+        border-radius: 10px;
+      }
+
+      .main {
+        padding: 16px;
+        gap: 14px;
+      }
+
+      .layout-two {
+        grid-template-columns: 1fr;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        gap: 10px;
+      }
+
+      .title-block h2 {
+        font-size: 24px;
+      }
+
+      .title-block p {
+        font-size: 14px;
+        margin-top: 5px;
+      }
+
+      .card {
+        padding: 14px;
+        box-shadow: 0 8px 22px rgba(46, 35, 23, .08);
+      }
+
+      .input,
+      .select,
+      .textarea {
+        min-height: 48px;
+        font-size: 16px;
+      }
+
+      .fab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        right: 16px;
+        bottom: calc(82px + env(safe-area-inset-bottom));
+        width: 58px;
+        height: 58px;
+        border: 0;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--accent-ink);
+        box-shadow: 0 14px 28px rgba(11, 111, 106, .28);
+        font-size: 32px;
+        line-height: 1;
+        z-index: 9;
+      }
+
+      .toast {
+        right: 12px;
+        bottom: calc(148px + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .topbar {
+        display: grid;
+      }
+
+      .toolbar,
+      .row-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .form-grid,
+      .checks {
+        grid-template-columns: 1fr;
+      }
+
+      .grid {
+        gap: 10px;
+      }
+
+      .stat strong {
+        font-size: 24px;
+      }
+
+      .expense,
+      .person,
+      .settlement {
+        padding: 10px 0;
+      }
+
+      .item-head {
+        display: grid;
+        gap: 6px;
+      }
+
+      .tabs-mobile {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Partage Vacances</h1>
+        <p>Les dépenses du groupe, les comptes clairs, et moins de calculs à table.</p>
+      </div>
+
+      <div class="trip-card">
+        <label for="tripName">Nom du voyage</label>
+      <input id="tripName" class="input" type="text" autocomplete="off" maxlength="60" enterkeyhint="done">
+      </div>
+
+      <nav class="nav" aria-label="Navigation principale">
+        <button type="button" data-tab="dashboard" aria-selected="true">Vue d'ensemble <span class="pill" id="navTotal">0 €</span></button>
+        <button type="button" data-tab="expenses" aria-selected="false">Dépenses <span class="pill" id="navExpenses">0</span></button>
+        <button type="button" data-tab="people" aria-selected="false">Participants <span class="pill" id="navPeople">0</span></button>
+        <button type="button" data-tab="settle" aria-selected="false">Remboursements <span class="pill" id="navSettle">0</span></button>
+      </nav>
+
+      <div class="side-actions">
+        <button class="btn ghost" type="button" id="exportBtn">Exporter</button>
+        <button class="btn ghost" type="button" id="importBtn">Importer</button>
+        <input class="hidden-file" id="importFile" type="file" accept="application/json">
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="tabs-mobile" aria-label="Navigation mobile">
+        <button class="btn primary" type="button" data-tab="dashboard">Accueil</button>
+        <button class="btn" type="button" data-tab="expenses">Dépenses</button>
+        <button class="btn" type="button" data-tab="people">Amis</button>
+        <button class="btn" type="button" data-tab="settle">Soldes</button>
+      </div>
+
+      <section id="dashboard" class="section active" aria-labelledby="dashboardTitle">
+        <div class="topbar">
+          <div class="title-block">
+            <h2 id="dashboardTitle">Vue d'ensemble</h2>
+            <p>Un aperçu rapide de ce que le groupe a dépensé et des comptes de chacun.</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn primary" type="button" data-open="expenses">Ajouter une dépense</button>
+            <button class="btn" type="button" id="shareBtn">Partager le résumé</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card stat">
+            <span>Total dépensé</span>
+            <strong id="totalSpent">0 €</strong>
+            <small class="small" id="totalContext">Aucune dépense pour l'instant.</small>
+          </div>
+          <div class="card stat">
+            <span>Dépense moyenne</span>
+            <strong id="averageSpent">0 €</strong>
+            <small class="small">Par participant actif.</small>
+          </div>
+          <div class="card stat">
+            <span>À régler</span>
+            <strong id="settlementCount">0</strong>
+            <small class="small">Remboursements simplifiés.</small>
+          </div>
+        </div>
+
+        <div class="layout-two">
+          <div class="card">
+            <div class="item-head">
+              <strong>Balances</strong>
+              <span class="small">positif = doit recevoir</span>
+            </div>
+            <div id="balanceList" class="list"></div>
+          </div>
+
+          <div class="card">
+            <div class="item-head">
+              <strong>Dernières dépenses</strong>
+              <button class="btn" type="button" data-open="expenses">Voir tout</button>
+            </div>
+            <div id="recentExpenses" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="expenses" class="section" aria-labelledby="expensesTitle">
+        <div class="topbar">
+          <div class="title-block">
+            <h2 id="expensesTitle">Dépenses</h2>
+            <p>Ajoute ce qui a été payé, par qui, et pour qui.</p>
+          </div>
+        </div>
+
+        <div class="layout-two">
+          <div class="card">
+            <form id="expenseForm" class="form">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="expenseLabel">Libellé</label>
+                  <input id="expenseLabel" class="input" type="text" placeholder="Courses, resto, essence..." maxlength="80" autocomplete="off" enterkeyhint="next" required>
+                </div>
+                <div class="field">
+                  <label for="expenseAmount">Montant</label>
+                  <input id="expenseAmount" class="input" type="number" min="0.01" step="0.01" placeholder="42.50" inputmode="decimal" enterkeyhint="next" required>
+                </div>
+                <div class="field">
+                  <label for="expensePayer">Payé par</label>
+                  <select id="expensePayer" class="select" required></select>
+                </div>
+                <div class="field">
+                  <label for="expenseCategory">Catégorie</label>
+                  <select id="expenseCategory" class="select">
+                    <option>Courses</option>
+                    <option>Restaurant</option>
+                    <option>Transport</option>
+                    <option>Logement</option>
+                    <option>Activité</option>
+                    <option>Autre</option>
+                  </select>
+                </div>
+              </div>
+
+              <fieldset class="check-group">
+                <legend>À partager avec</legend>
+                <div class="row-actions">
+                  <button class="btn" type="button" id="selectAllPeople">Tout le monde</button>
+                  <button class="btn" type="button" id="selectNoPeople">Personne</button>
+                </div>
+                <div id="splitChecks" class="checks"></div>
+              </fieldset>
+
+              <div class="field">
+                <label for="expenseNote">Note</label>
+                <textarea id="expenseNote" class="textarea" placeholder="Optionnel : détail, lieu, ticket..." maxlength="220" enterkeyhint="done"></textarea>
+              </div>
+
+              <button class="btn primary" type="submit">Ajouter la dépense</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="item-head">
+              <strong>Historique</strong>
+              <button class="btn danger" type="button" id="clearExpensesBtn">Vider</button>
+            </div>
+            <div id="expenseList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="people" class="section" aria-labelledby="peopleTitle">
+        <div class="topbar">
+          <div class="title-block">
+            <h2 id="peopleTitle">Participants</h2>
+            <p>Garde la liste courte et claire. Tu peux retirer quelqu'un tant qu'il n'a pas de dépense liée.</p>
+          </div>
+        </div>
+
+        <div class="layout-two">
+          <div class="card">
+            <form id="personForm" class="form">
+              <div class="field">
+                <label for="personName">Prénom</label>
+                <input id="personName" class="input" type="text" placeholder="Alex" maxlength="40" autocomplete="off" enterkeyhint="done" required>
+              </div>
+              <button class="btn primary" type="submit">Ajouter</button>
+            </form>
+          </div>
+          <div class="card">
+            <strong>Liste</strong>
+            <div id="peopleList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="settle" class="section" aria-labelledby="settleTitle">
+        <div class="topbar">
+          <div class="title-block">
+            <h2 id="settleTitle">Remboursements</h2>
+            <p>Le nombre de virements est réduit au minimum pratique.</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn" type="button" id="copySettleBtn">Copier les virements</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="settlementList" class="list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <button class="fab" type="button" data-open="expenses" aria-label="Ajouter une dépense">+</button>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = "partage-vacances-v1";
+
+    const defaultState = {
+      tripName: "Vacances entre amis",
+      people: [
+        { id: crypto.randomUUID(), name: "Moi" },
+        { id: crypto.randomUUID(), name: "Alex" }
+      ],
+      expenses: []
+    };
+
+    let state = loadState();
+
+    const els = {
+      tripName: document.getElementById("tripName"),
+      navButtons: [...document.querySelectorAll(".nav button[data-tab], .tabs-mobile button[data-tab]")],
+      sections: [...document.querySelectorAll(".section")],
+      navTotal: document.getElementById("navTotal"),
+      navExpenses: document.getElementById("navExpenses"),
+      navPeople: document.getElementById("navPeople"),
+      navSettle: document.getElementById("navSettle"),
+      totalSpent: document.getElementById("totalSpent"),
+      totalContext: document.getElementById("totalContext"),
+      averageSpent: document.getElementById("averageSpent"),
+      settlementCount: document.getElementById("settlementCount"),
+      balanceList: document.getElementById("balanceList"),
+      recentExpenses: document.getElementById("recentExpenses"),
+      expenseForm: document.getElementById("expenseForm"),
+      expenseLabel: document.getElementById("expenseLabel"),
+      expenseAmount: document.getElementById("expenseAmount"),
+      expensePayer: document.getElementById("expensePayer"),
+      expenseCategory: document.getElementById("expenseCategory"),
+      expenseNote: document.getElementById("expenseNote"),
+      splitChecks: document.getElementById("splitChecks"),
+      expenseList: document.getElementById("expenseList"),
+      personForm: document.getElementById("personForm"),
+      personName: document.getElementById("personName"),
+      peopleList: document.getElementById("peopleList"),
+      settlementList: document.getElementById("settlementList"),
+      toast: document.getElementById("toast"),
+      shareBtn: document.getElementById("shareBtn"),
+      copySettleBtn: document.getElementById("copySettleBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      importBtn: document.getElementById("importBtn"),
+      importFile: document.getElementById("importFile"),
+      selectAllPeople: document.getElementById("selectAllPeople"),
+      selectNoPeople: document.getElementById("selectNoPeople"),
+      clearExpensesBtn: document.getElementById("clearExpensesBtn")
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultState);
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed.people) || !Array.isArray(parsed.expenses)) {
+          return structuredClone(defaultState);
+        }
+        return {
+          tripName: parsed.tripName || defaultState.tripName,
+          people: parsed.people,
+          expenses: parsed.expenses
+        };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function money(value) {
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR"
+      }).format(Math.round((value + Number.EPSILON) * 100) / 100);
+    }
+
+    function shortDate(iso) {
+      return new Intl.DateTimeFormat("fr-FR", {
+        day: "2-digit",
+        month: "short"
+      }).format(new Date(iso));
+    }
+
+    function getPerson(id) {
+      return state.people.find(person => person.id === id);
+    }
+
+    function expenseShare(expense) {
+      const people = expense.splitWith.length || 1;
+      return expense.amount / people;
+    }
+
+    function computeBalances() {
+      const balances = Object.fromEntries(state.people.map(person => [person.id, 0]));
+      state.expenses.forEach(expense => {
+        if (balances[expense.payerId] === undefined) return;
+        balances[expense.payerId] += expense.amount;
+        const share = expenseShare(expense);
+        expense.splitWith.forEach(personId => {
+          if (balances[personId] !== undefined) balances[personId] -= share;
+        });
+      });
+      return balances;
+    }
+
+    function computeSettlements() {
+      const balances = computeBalances();
+      const debtors = [];
+      const creditors = [];
+
+      state.people.forEach(person => {
+        const balance = Math.round((balances[person.id] || 0) * 100) / 100;
+        if (balance < -0.01) debtors.push({ ...person, amount: -balance });
+        if (balance > 0.01) creditors.push({ ...person, amount: balance });
+      });
+
+      debtors.sort((a, b) => b.amount - a.amount);
+      creditors.sort((a, b) => b.amount - a.amount);
+
+      const settlements = [];
+      let debtorIndex = 0;
+      let creditorIndex = 0;
+
+      while (debtorIndex < debtors.length && creditorIndex < creditors.length) {
+        const debtor = debtors[debtorIndex];
+        const creditor = creditors[creditorIndex];
+        const amount = Math.min(debtor.amount, creditor.amount);
+
+        if (amount > 0.01) {
+          settlements.push({
+            from: debtor.name,
+            to: creditor.name,
+            amount: Math.round(amount * 100) / 100
+          });
+        }
+
+        debtor.amount = Math.round((debtor.amount - amount) * 100) / 100;
+        creditor.amount = Math.round((creditor.amount - amount) * 100) / 100;
+        if (debtor.amount <= 0.01) debtorIndex++;
+        if (creditor.amount <= 0.01) creditorIndex++;
+      }
+
+      return settlements;
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove("show"), 2400);
+    }
+
+    function setTab(tabId) {
+      els.sections.forEach(section => section.classList.toggle("active", section.id === tabId));
+      els.navButtons.forEach(button => {
+        const selected = button.dataset.tab === tabId;
+        if (button.closest(".nav")) button.setAttribute("aria-selected", String(selected));
+        if (button.closest(".tabs-mobile")) {
+          button.classList.toggle("primary", selected);
+        }
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function renderPersonOptions() {
+      els.expensePayer.innerHTML = state.people
+        .map(person => `<option value="${person.id}">${escapeHTML(person.name)}</option>`)
+        .join("");
+
+      els.splitChecks.innerHTML = state.people.map(person => `
+        <label class="check">
+          <input type="checkbox" name="splitWith" value="${person.id}" checked>
+          <span>${escapeHTML(person.name)}</span>
+        </label>
+      `).join("");
+    }
+
+    function renderPeople() {
+      if (!state.people.length) {
+        els.peopleList.innerHTML = `<p class="empty">Ajoute au moins deux participants pour commencer à partager les dépenses.</p>`;
+        return;
+      }
+
+      els.peopleList.innerHTML = state.people.map(person => {
+        const used = state.expenses.some(expense => expense.payerId === person.id || expense.splitWith.includes(person.id));
+        return `
+          <div class="person">
+            <div class="item-head">
+              <strong>${escapeHTML(person.name)}</strong>
+              <button class="btn danger" type="button" data-delete-person="${person.id}" ${used ? "disabled" : ""}>Retirer</button>
+            </div>
+            <span class="small">${used ? "Présent dans l'historique des dépenses." : "Peut être retiré."}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderExpenses() {
+      if (!state.expenses.length) {
+        els.expenseList.innerHTML = `<p class="empty">Aucune dépense enregistrée.</p>`;
+        els.recentExpenses.innerHTML = `<p class="empty">Les dernières dépenses apparaîtront ici.</p>`;
+        return;
+      }
+
+      const expenseMarkup = state.expenses
+        .slice()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .map(expense => expenseTemplate(expense))
+        .join("");
+
+      els.expenseList.innerHTML = expenseMarkup;
+      els.recentExpenses.innerHTML = state.expenses
+        .slice()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 4)
+        .map(expense => expenseTemplate(expense, true))
+        .join("");
+    }
+
+    function expenseTemplate(expense, compact = false) {
+      const payer = getPerson(expense.payerId)?.name || "Inconnu";
+      const names = expense.splitWith.map(id => getPerson(id)?.name).filter(Boolean).join(", ");
+      return `
+        <article class="expense">
+          <div class="item-head">
+            <div>
+              <strong>${escapeHTML(expense.label)}</strong>
+              <div class="meta">${escapeHTML(expense.category)} · ${shortDate(expense.createdAt)} · payé par ${escapeHTML(payer)}</div>
+            </div>
+            <span class="money">${money(expense.amount)}</span>
+          </div>
+          <div class="small">Partagé avec ${escapeHTML(names || "personne")} · ${money(expenseShare(expense))} par personne</div>
+          ${expense.note && !compact ? `<div class="small">${escapeHTML(expense.note)}</div>` : ""}
+          ${compact ? "" : `<div><button class="btn danger" type="button" data-delete-expense="${expense.id}">Supprimer</button></div>`}
+        </article>
+      `;
+    }
+
+    function renderBalances() {
+      const balances = computeBalances();
+      const maxAbs = Math.max(1, ...Object.values(balances).map(value => Math.abs(value)));
+
+      if (!state.people.length) {
+        els.balanceList.innerHTML = `<p class="empty">Ajoute les participants pour voir les balances.</p>`;
+        return;
+      }
+
+      els.balanceList.innerHTML = state.people.map(person => {
+        const balance = Math.round((balances[person.id] || 0) * 100) / 100;
+        const className = balance >= 0.01 ? "positive" : balance <= -0.01 ? "negative" : "";
+        const width = Math.max(2, Math.abs(balance) / maxAbs * 100);
+        const label = balance > 0.01 ? "doit recevoir" : balance < -0.01 ? "doit payer" : "à l'équilibre";
+        return `
+          <div class="balance-row">
+            <div>
+              <strong>${escapeHTML(person.name)}</strong>
+              <div class="small">${label}</div>
+              <div class="bar" aria-hidden="true"><span style="width:${width}%"></span></div>
+            </div>
+            <span class="money ${className}">${money(balance)}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderSettlements() {
+      const settlements = computeSettlements();
+      els.settlementCount.textContent = String(settlements.length);
+      els.navSettle.textContent = String(settlements.length);
+
+      if (!settlements.length) {
+        els.settlementList.innerHTML = `<p class="empty">Tout est équilibré. Rien à rembourser pour le moment.</p>`;
+        return;
+      }
+
+      els.settlementList.innerHTML = settlements.map(item => `
+        <div class="settlement">
+          <div class="item-head">
+            <strong>${escapeHTML(item.from)} rembourse ${escapeHTML(item.to)}</strong>
+            <span class="money">${money(item.amount)}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderStats() {
+      const total = state.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+      const average = state.people.length ? total / state.people.length : 0;
+
+      els.navTotal.textContent = money(total);
+      els.navExpenses.textContent = String(state.expenses.length);
+      els.navPeople.textContent = String(state.people.length);
+      els.totalSpent.textContent = money(total);
+      els.averageSpent.textContent = money(average);
+      els.totalContext.textContent = state.expenses.length
+        ? `${state.expenses.length} dépense${state.expenses.length > 1 ? "s" : ""} enregistrée${state.expenses.length > 1 ? "s" : ""}.`
+        : "Aucune dépense pour l'instant.";
+    }
+
+    function render() {
+      els.tripName.value = state.tripName;
+      renderPersonOptions();
+      renderPeople();
+      renderExpenses();
+      renderBalances();
+      renderSettlements();
+      renderStats();
+      saveState();
+    }
+
+    function summaryText() {
+      const lines = [`${state.tripName}`, ""];
+      lines.push(`Total dépensé : ${money(state.expenses.reduce((sum, expense) => sum + expense.amount, 0))}`);
+      lines.push("");
+      lines.push("Remboursements :");
+      const settlements = computeSettlements();
+      if (!settlements.length) lines.push("- Rien à rembourser");
+      settlements.forEach(item => lines.push(`- ${item.from} rembourse ${item.to} : ${money(item.amount)}`));
+      return lines.join("\n");
+    }
+
+    async function copyText(text, successMessage) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(successMessage);
+      } catch {
+        showToast("Impossible de copier automatiquement.");
+      }
+    }
+
+    els.tripName.addEventListener("input", event => {
+      state.tripName = event.target.value.trim() || defaultState.tripName;
+      saveState();
+    });
+
+    els.navButtons.forEach(button => {
+      button.addEventListener("click", () => setTab(button.dataset.tab));
+    });
+
+    document.querySelectorAll("[data-open]").forEach(button => {
+      button.addEventListener("click", () => setTab(button.dataset.open));
+    });
+
+    els.personForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const name = els.personName.value.trim();
+      if (!name) return;
+      if (state.people.some(person => person.name.toLowerCase() === name.toLowerCase())) {
+        showToast("Ce prénom est déjà dans la liste.");
+        return;
+      }
+      state.people.push({ id: crypto.randomUUID(), name });
+      els.personName.value = "";
+      render();
+      showToast(`${name} ajouté.`);
+    });
+
+    els.peopleList.addEventListener("click", event => {
+      const button = event.target.closest("[data-delete-person]");
+      if (!button) return;
+      state.people = state.people.filter(person => person.id !== button.dataset.deletePerson);
+      render();
+    });
+
+    els.expenseForm.addEventListener("submit", event => {
+      event.preventDefault();
+      if (state.people.length < 1) {
+        showToast("Ajoute au moins un participant.");
+        return;
+      }
+
+      const splitWith = [...els.splitChecks.querySelectorAll("input:checked")].map(input => input.value);
+      if (!splitWith.length) {
+        showToast("Choisis au moins une personne avec qui partager.");
+        return;
+      }
+
+      const amount = Number(els.expenseAmount.value);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        showToast("Montant invalide.");
+        return;
+      }
+
+      state.expenses.push({
+        id: crypto.randomUUID(),
+        label: els.expenseLabel.value.trim(),
+        amount: Math.round(amount * 100) / 100,
+        payerId: els.expensePayer.value,
+        splitWith,
+        category: els.expenseCategory.value,
+        note: els.expenseNote.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+
+      els.expenseForm.reset();
+      render();
+      showToast("Dépense ajoutée.");
+      setTab("dashboard");
+    });
+
+    els.expenseList.addEventListener("click", event => {
+      const button = event.target.closest("[data-delete-expense]");
+      if (!button) return;
+      state.expenses = state.expenses.filter(expense => expense.id !== button.dataset.deleteExpense);
+      render();
+      showToast("Dépense supprimée.");
+    });
+
+    els.selectAllPeople.addEventListener("click", () => {
+      els.splitChecks.querySelectorAll("input").forEach(input => input.checked = true);
+    });
+
+    els.selectNoPeople.addEventListener("click", () => {
+      els.splitChecks.querySelectorAll("input").forEach(input => input.checked = false);
+    });
+
+    els.clearExpensesBtn.addEventListener("click", () => {
+      if (!state.expenses.length) return;
+      if (!confirm("Supprimer toutes les dépenses du voyage ?")) return;
+      state.expenses = [];
+      render();
+      showToast("Historique vidé.");
+    });
+
+    els.shareBtn.addEventListener("click", async () => {
+      const text = summaryText();
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: state.tripName, text });
+          return;
+        } catch {
+          // The user may cancel the native share sheet.
+        }
+      }
+      copyText(text, "Résumé copié.");
+    });
+
+    els.copySettleBtn.addEventListener("click", () => {
+      copyText(summaryText(), "Remboursements copiés.");
+    });
+
+    els.exportBtn.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${state.tripName.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "voyage"}-depenses.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("Fichier exporté.");
+    });
+
+    els.importBtn.addEventListener("click", () => els.importFile.click());
+
+    els.importFile.addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        if (!Array.isArray(imported.people) || !Array.isArray(imported.expenses)) {
+          throw new Error("Format invalide");
+        }
+        state = {
+          tripName: imported.tripName || defaultState.tripName,
+          people: imported.people,
+          expenses: imported.expenses
+        };
+        render();
+        showToast("Voyage importé.");
+      } catch {
+        showToast("Import impossible : fichier invalide.");
+      } finally {
+        els.importFile.value = "";
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
