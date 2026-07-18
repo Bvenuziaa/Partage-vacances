@@ -119,7 +119,14 @@
     }
 
     .free-notes {
-      min-height: 55vh;
+      min-height: 60vh;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding: 0 2px;
+      overflow: hidden;
+      resize: none;
+      font-size: 18px;
       line-height: 1.55;
     }
 
@@ -659,6 +666,12 @@
         font-size: 16px;
       }
 
+      .free-notes {
+        min-height: 65vh;
+        padding: 0;
+        font-size: 18px;
+      }
+
       .fab {
         display: inline-flex;
         align-items: center;
@@ -1039,7 +1052,7 @@
                 </div>
               </div>
               <div class="field">
-                <label for="paymentAmount">Montant remboursé</label>
+                <label for="paymentAmount">Montant payé <span class="small" id="paymentMaximum"></span></label>
                 <input id="paymentAmount" class="input" type="number" min="0.01" step="0.01" placeholder="50.00" inputmode="decimal" required>
               </div>
               <div class="field">
@@ -1159,6 +1172,7 @@
       paymentFrom: document.getElementById("paymentFrom"),
       paymentTo: document.getElementById("paymentTo"),
       paymentAmount: document.getElementById("paymentAmount"),
+      paymentMaximum: document.getElementById("paymentMaximum"),
       paymentNote: document.getElementById("paymentNote"),
       paymentList: document.getElementById("paymentList"),
       debtNotes: document.getElementById("debtNotes")
@@ -1252,6 +1266,27 @@
       return balances;
     }
 
+    function maximumPaymentAmount() {
+      const balances = computeBalances();
+      const fromBalance = Math.round((balances[els.paymentFrom.value] || 0) * 100) / 100;
+      const toBalance = Math.round((balances[els.paymentTo.value] || 0) * 100) / 100;
+      return Math.max(0, Math.round(Math.min(-fromBalance, toBalance) * 100) / 100);
+    }
+
+    function updatePaymentMaximum() {
+      const maximum = maximumPaymentAmount();
+      els.paymentMaximum.textContent = maximum > 0 ? `(sur ${money(maximum)} restant)` : "";
+      els.paymentAmount.max = maximum > 0 ? String(maximum) : "";
+      els.paymentAmount.placeholder = maximum > 0 ? maximum.toFixed(2) : "50.00";
+    }
+
+    function resizeDebtNotes() {
+      els.debtNotes.style.height = "auto";
+      if (els.debtNotes.scrollHeight > 0) {
+        els.debtNotes.style.height = `${els.debtNotes.scrollHeight}px`;
+      }
+    }
+
     function computeSettlements() {
       const balances = computeBalances();
       const debtors = [];
@@ -1312,6 +1347,7 @@
           button.classList.toggle("primary", selected);
         }
       });
+      if (tabId === "debt") resizeDebtNotes();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1371,6 +1407,7 @@
       const creditor = state.people.find(person => (balances[person.id] || 0) > 0.01);
       if (debtor) els.paymentFrom.value = debtor.id;
       if (creditor) els.paymentTo.value = creditor.id;
+      updatePaymentMaximum();
     }
 
     function renderPeople() {
@@ -1560,7 +1597,7 @@
             <span class="money">${money(item.amount)}</span>
           </div>
           <div class="row-actions">
-            <button class="btn" type="button" data-record-payment data-from="${item.fromId}" data-to="${item.toId}" data-amount="${item.amount}">Enregistrer un paiement</button>
+            <button class="btn" type="button" data-record-payment data-from="${item.fromId}" data-to="${item.toId}" data-amount="${item.amount}">Saisir un paiement partiel</button>
           </div>
         </div>
       `).join("");
@@ -1615,6 +1652,7 @@
       els.tripName.value = state.tripName;
       els.mobileTripTitle.textContent = state.tripName;
       els.debtNotes.value = state.debtNotes;
+      resizeDebtNotes();
       renderPersonOptions();
       renderPeople();
       renderExpenses();
@@ -1669,6 +1707,7 @@
 
     els.debtNotes.addEventListener("input", event => {
       state.debtNotes = event.target.value;
+      resizeDebtNotes();
       saveState();
     });
 
@@ -1699,8 +1738,13 @@
     });
 
     els.togglePaymentFormBtn.addEventListener("click", () => {
-      setFormExpanded("settle", els.paymentFormPanel.hidden);
+      const opening = els.paymentFormPanel.hidden;
+      setFormExpanded("settle", opening);
+      if (opening) updatePaymentMaximum();
     });
+
+    els.paymentFrom.addEventListener("change", updatePaymentMaximum);
+    els.paymentTo.addEventListener("change", updatePaymentMaximum);
 
     els.personForm.addEventListener("submit", event => {
       event.preventDefault();
@@ -1876,7 +1920,9 @@
       setFormExpanded("settle", true);
       els.paymentFrom.value = button.dataset.from;
       els.paymentTo.value = button.dataset.to;
-      els.paymentAmount.value = Number(button.dataset.amount).toFixed(2);
+      els.paymentAmount.value = "";
+      els.paymentAmount.placeholder = Number(button.dataset.amount).toFixed(2);
+      updatePaymentMaximum();
       els.paymentForm.scrollIntoView({ behavior: "smooth", block: "start" });
       els.paymentAmount.focus({ preventScroll: true });
     });
