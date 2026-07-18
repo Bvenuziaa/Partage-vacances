@@ -118,6 +118,11 @@
       resize: vertical;
     }
 
+    .free-notes {
+      min-height: 55vh;
+      line-height: 1.55;
+    }
+
     .sidebar .input {
       background: #fffaf5;
       border-color: #d9c9df;
@@ -344,6 +349,7 @@
     .expense,
     .person,
     .settlement,
+    .payment,
     .activity {
       display: grid;
       gap: 8px;
@@ -354,6 +360,7 @@
     .expense:last-child,
     .person:last-child,
     .settlement:last-child,
+    .payment:last-child,
     .activity:last-child {
       border-bottom: 0;
       padding-bottom: 0;
@@ -590,7 +597,7 @@
 
       .tabs-mobile {
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 5px;
         position: fixed;
         left: 0;
@@ -605,7 +612,7 @@
 
       .tabs-mobile button {
         min-height: 46px;
-        padding: 7px 3px;
+        padding: 7px 2px;
         font-size: 11px;
         border-radius: 10px;
       }
@@ -671,6 +678,10 @@
         z-index: 9;
       }
 
+      body.is-debt .fab {
+        display: none;
+      }
+
       .toast {
         right: 12px;
         bottom: calc(148px + env(safe-area-inset-bottom));
@@ -709,6 +720,7 @@
       .expense,
       .person,
       .settlement,
+      .payment,
       .activity {
         padding: 10px 0;
       }
@@ -719,7 +731,7 @@
       }
 
       .tabs-mobile {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
       }
 
       .activity {
@@ -752,6 +764,7 @@
         <button type="button" data-tab="planning" aria-selected="false">Planning <span class="pill" id="navPlanning">0</span></button>
         <button type="button" data-tab="people" aria-selected="false">Participants <span class="pill" id="navPeople">0</span></button>
         <button type="button" data-tab="settle" aria-selected="false">Remboursements <span class="pill" id="navSettle">0</span></button>
+        <button type="button" data-tab="debt" aria-selected="false">Dette</button>
       </nav>
 
       <div class="side-actions">
@@ -764,10 +777,11 @@
     <main class="main">
       <div class="tabs-mobile" aria-label="Navigation mobile">
         <button class="btn primary" type="button" data-tab="dashboard">Accueil</button>
-        <button class="btn" type="button" data-tab="expenses">Dépenses</button>
-        <button class="btn" type="button" data-tab="planning">Planning</button>
+        <button class="btn" type="button" data-tab="expenses">Dép.</button>
+        <button class="btn" type="button" data-tab="planning">Plan</button>
         <button class="btn" type="button" data-tab="people">Amis</button>
         <button class="btn" type="button" data-tab="settle">Soldes</button>
+        <button class="btn" type="button" data-tab="debt">Dette</button>
       </div>
 
       <section id="dashboard" class="section active" aria-labelledby="dashboardTitle">
@@ -847,6 +861,7 @@
         <div class="layout-two">
           <div class="card form-panel" id="expenseFormPanel" hidden>
             <form id="expenseForm" class="form">
+              <input id="expenseId" type="hidden">
               <div class="form-grid">
                 <div class="field">
                   <label for="expenseLabel">Libellé</label>
@@ -887,7 +902,10 @@
                 <textarea id="expenseNote" class="textarea" placeholder="Optionnel : détail, lieu, ticket..." maxlength="220" enterkeyhint="done"></textarea>
               </div>
 
-              <button class="btn primary" type="submit">Ajouter la dépense</button>
+              <div class="edit-actions">
+                <button class="btn primary" id="expenseSubmitBtn" type="submit">Ajouter la dépense</button>
+                <button class="btn" id="expenseCancelBtn" type="button" hidden>Annuler</button>
+              </div>
             </form>
           </div>
 
@@ -1002,13 +1020,55 @@
             <p>Le nombre de virements est réduit au minimum pratique.</p>
           </div>
           <div class="toolbar">
+            <button class="btn primary" id="togglePaymentFormBtn" type="button" aria-expanded="false" aria-controls="paymentFormPanel">Enregistrer un paiement</button>
             <button class="btn" type="button" id="copySettleBtn">Copier les virements</button>
           </div>
         </div>
 
-        <div class="card">
-          <div id="settlementList" class="list"></div>
+        <div class="layout-two">
+          <div class="card form-panel" id="paymentFormPanel" hidden>
+            <form id="paymentForm" class="form">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="paymentFrom">Qui a payé</label>
+                  <select id="paymentFrom" class="select" required></select>
+                </div>
+                <div class="field">
+                  <label for="paymentTo">À qui</label>
+                  <select id="paymentTo" class="select" required></select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="paymentAmount">Montant remboursé</label>
+                <input id="paymentAmount" class="input" type="number" min="0.01" step="0.01" placeholder="50.00" inputmode="decimal" required>
+              </div>
+              <div class="field">
+                <label for="paymentNote">Note</label>
+                <input id="paymentNote" class="input" type="text" placeholder="Virement, espèces..." maxlength="100" autocomplete="off" enterkeyhint="done">
+              </div>
+              <button class="btn primary" type="submit">Valider le paiement</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <strong>Remboursements restants</strong>
+            <div id="settlementList" class="list"></div>
+          </div>
         </div>
+
+        <div class="card">
+          <strong>Paiements enregistrés</strong>
+          <div id="paymentList" class="list"></div>
+        </div>
+      </section>
+
+      <section id="debt" class="section" aria-labelledby="debtTitle">
+        <div class="topbar">
+          <div class="title-block">
+            <h2 id="debtTitle">Dette</h2>
+          </div>
+        </div>
+        <textarea id="debtNotes" class="textarea free-notes" placeholder="Écris ici..." aria-label="Notes libres sur les dettes"></textarea>
       </section>
     </main>
   </div>
@@ -1026,7 +1086,9 @@
         { id: crypto.randomUUID(), name: "Alex" }
       ],
       expenses: [],
-      activities: []
+      activities: [],
+      payments: [],
+      debtNotes: ""
     };
 
     let state = loadState();
@@ -1053,11 +1115,14 @@
       expenseForm: document.getElementById("expenseForm"),
       expenseFormPanel: document.getElementById("expenseFormPanel"),
       toggleExpenseFormBtn: document.getElementById("toggleExpenseFormBtn"),
+      expenseId: document.getElementById("expenseId"),
       expenseLabel: document.getElementById("expenseLabel"),
       expenseAmount: document.getElementById("expenseAmount"),
       expensePayer: document.getElementById("expensePayer"),
       expenseCategory: document.getElementById("expenseCategory"),
       expenseNote: document.getElementById("expenseNote"),
+      expenseSubmitBtn: document.getElementById("expenseSubmitBtn"),
+      expenseCancelBtn: document.getElementById("expenseCancelBtn"),
       splitChecks: document.getElementById("splitChecks"),
       expenseList: document.getElementById("expenseList"),
       personForm: document.getElementById("personForm"),
@@ -1087,7 +1152,16 @@
       activitySubmitBtn: document.getElementById("activitySubmitBtn"),
       activityCancelBtn: document.getElementById("activityCancelBtn"),
       planningList: document.getElementById("planningList"),
-      clearPlanningBtn: document.getElementById("clearPlanningBtn")
+      clearPlanningBtn: document.getElementById("clearPlanningBtn"),
+      paymentFormPanel: document.getElementById("paymentFormPanel"),
+      togglePaymentFormBtn: document.getElementById("togglePaymentFormBtn"),
+      paymentForm: document.getElementById("paymentForm"),
+      paymentFrom: document.getElementById("paymentFrom"),
+      paymentTo: document.getElementById("paymentTo"),
+      paymentAmount: document.getElementById("paymentAmount"),
+      paymentNote: document.getElementById("paymentNote"),
+      paymentList: document.getElementById("paymentList"),
+      debtNotes: document.getElementById("debtNotes")
     };
 
     function loadState() {
@@ -1102,7 +1176,9 @@
           tripName: parsed.tripName || defaultState.tripName,
           people: parsed.people,
           expenses: parsed.expenses,
-          activities: Array.isArray(parsed.activities) ? parsed.activities : []
+          activities: Array.isArray(parsed.activities) ? parsed.activities : [],
+          payments: Array.isArray(parsed.payments) ? parsed.payments : [],
+          debtNotes: typeof parsed.debtNotes === "string" ? parsed.debtNotes : ""
         };
       } catch {
         return structuredClone(defaultState);
@@ -1169,6 +1245,10 @@
           if (balances[personId] !== undefined) balances[personId] -= share;
         });
       });
+      state.payments.forEach(payment => {
+        if (balances[payment.fromId] !== undefined) balances[payment.fromId] += payment.amount;
+        if (balances[payment.toId] !== undefined) balances[payment.toId] -= payment.amount;
+      });
       return balances;
     }
 
@@ -1197,6 +1277,8 @@
 
         if (amount > 0.01) {
           settlements.push({
+            fromId: debtor.id,
+            toId: creditor.id,
             from: debtor.name,
             to: creditor.name,
             amount: Math.round(amount * 100) / 100
@@ -1221,6 +1303,7 @@
 
     function setTab(tabId) {
       document.body.classList.toggle("is-dashboard", tabId === "dashboard");
+      document.body.classList.toggle("is-debt", tabId === "debt");
       els.sections.forEach(section => section.classList.toggle("active", section.id === tabId));
       els.navButtons.forEach(button => {
         const selected = button.dataset.tab === tabId;
@@ -1233,14 +1316,29 @@
     }
 
     function setFormExpanded(kind, expanded) {
-      const isExpense = kind === "expenses";
-      const panel = isExpense ? els.expenseFormPanel : els.activityFormPanel;
-      const button = isExpense ? els.toggleExpenseFormBtn : els.toggleActivityFormBtn;
+      const forms = {
+        expenses: {
+          panel: els.expenseFormPanel,
+          button: els.toggleExpenseFormBtn,
+          label: "Ajouter une dépense"
+        },
+        planning: {
+          panel: els.activityFormPanel,
+          button: els.toggleActivityFormBtn,
+          label: "Ajouter une activité"
+        },
+        settle: {
+          panel: els.paymentFormPanel,
+          button: els.togglePaymentFormBtn,
+          label: "Enregistrer un paiement"
+        }
+      };
+      const form = forms[kind];
+      if (!form) return;
+      const { panel, button, label } = form;
       panel.hidden = !expanded;
       button.setAttribute("aria-expanded", String(expanded));
-      button.textContent = expanded
-        ? "Masquer le formulaire"
-        : isExpense ? "Ajouter une dépense" : "Ajouter une activité";
+      button.textContent = expanded ? "Masquer le formulaire" : label;
     }
 
     function escapeHTML(value) {
@@ -1254,9 +1352,12 @@
     }
 
     function renderPersonOptions() {
-      els.expensePayer.innerHTML = state.people
+      const options = state.people
         .map(person => `<option value="${person.id}">${escapeHTML(person.name)}</option>`)
         .join("");
+      els.expensePayer.innerHTML = options;
+      els.paymentFrom.innerHTML = options;
+      els.paymentTo.innerHTML = options;
 
       els.splitChecks.innerHTML = state.people.map(person => `
         <label class="check">
@@ -1264,6 +1365,12 @@
           <span>${escapeHTML(person.name)}</span>
         </label>
       `).join("");
+
+      const balances = computeBalances();
+      const debtor = state.people.find(person => (balances[person.id] || 0) < -0.01);
+      const creditor = state.people.find(person => (balances[person.id] || 0) > 0.01);
+      if (debtor) els.paymentFrom.value = debtor.id;
+      if (creditor) els.paymentTo.value = creditor.id;
     }
 
     function renderPeople() {
@@ -1273,14 +1380,16 @@
       }
 
       els.peopleList.innerHTML = state.people.map(person => {
-        const used = state.expenses.some(expense => expense.payerId === person.id || expense.splitWith.includes(person.id));
+        const usedInExpense = state.expenses.some(expense => expense.payerId === person.id || expense.splitWith.includes(person.id));
+        const usedInPayment = state.payments.some(payment => payment.fromId === person.id || payment.toId === person.id);
+        const used = usedInExpense || usedInPayment;
         return `
           <div class="person">
             <div class="item-head">
               <strong>${escapeHTML(person.name)}</strong>
               <button class="btn danger" type="button" data-delete-person="${person.id}" ${used ? "disabled" : ""}>Retirer</button>
             </div>
-            <span class="small">${used ? "Présent dans l'historique des dépenses." : "Peut être retiré."}</span>
+            <span class="small">${used ? "Présent dans l'historique du voyage." : "Peut être retiré."}</span>
           </div>
         `;
       }).join("");
@@ -1322,9 +1431,21 @@
           </div>
           <div class="small">Partagé avec ${escapeHTML(names || "personne")} · ${money(expenseShare(expense))} par personne</div>
           ${expense.note && !compact ? `<div class="small">${escapeHTML(expense.note)}</div>` : ""}
-          ${compact ? "" : `<div><button class="btn danger" type="button" data-delete-expense="${expense.id}">Supprimer</button></div>`}
+          ${compact ? "" : `
+            <div class="row-actions">
+              <button class="btn" type="button" data-edit-expense="${expense.id}">Modifier</button>
+              <button class="btn danger" type="button" data-delete-expense="${expense.id}">Supprimer</button>
+            </div>
+          `}
         </article>
       `;
+    }
+
+    function resetExpenseForm() {
+      els.expenseForm.reset();
+      els.expenseId.value = "";
+      els.expenseSubmitBtn.textContent = "Ajouter la dépense";
+      els.expenseCancelBtn.hidden = true;
     }
 
     function activityTemplate(activity) {
@@ -1438,8 +1559,42 @@
             <strong>${escapeHTML(item.from)} rembourse ${escapeHTML(item.to)}</strong>
             <span class="money">${money(item.amount)}</span>
           </div>
+          <div class="row-actions">
+            <button class="btn" type="button" data-record-payment data-from="${item.fromId}" data-to="${item.toId}" data-amount="${item.amount}">Enregistrer un paiement</button>
+          </div>
         </div>
       `).join("");
+    }
+
+    function renderPayments() {
+      if (!state.payments.length) {
+        els.paymentList.innerHTML = `<p class="empty">Aucun paiement partiel enregistré.</p>`;
+        return;
+      }
+
+      els.paymentList.innerHTML = state.payments
+        .slice()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .map(payment => {
+          const from = getPerson(payment.fromId)?.name || "Inconnu";
+          const to = getPerson(payment.toId)?.name || "Inconnu";
+          return `
+            <article class="payment">
+              <div class="item-head">
+                <strong>${escapeHTML(from)} a remboursé ${escapeHTML(to)}</strong>
+                <span class="money positive">${money(payment.amount)}</span>
+              </div>
+              <div class="meta">${shortDate(payment.createdAt)}${payment.note ? ` · ${escapeHTML(payment.note)}` : ""}</div>
+              <div class="row-actions">
+                <button class="btn danger" type="button" data-delete-payment="${payment.id}">Annuler ce paiement</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+    }
+
+    function resetPaymentForm() {
+      els.paymentForm.reset();
     }
 
     function renderStats() {
@@ -1459,11 +1614,13 @@
     function render() {
       els.tripName.value = state.tripName;
       els.mobileTripTitle.textContent = state.tripName;
+      els.debtNotes.value = state.debtNotes;
       renderPersonOptions();
       renderPeople();
       renderExpenses();
       renderBalances();
       renderSettlements();
+      renderPayments();
       renderPlanning();
       renderStats();
       saveState();
@@ -1478,6 +1635,14 @@
       if (!upcomingActivities.length) lines.push("- Aucune activité à venir");
       upcomingActivities.forEach(activity => {
         lines.push(`- ${activityDateLabel(activity.date)} à ${activity.start} : ${activity.title}`);
+      });
+      lines.push("");
+      lines.push("Paiements enregistrés :");
+      if (!state.payments.length) lines.push("- Aucun paiement enregistré");
+      state.payments.forEach(payment => {
+        const from = getPerson(payment.fromId)?.name || "Inconnu";
+        const to = getPerson(payment.toId)?.name || "Inconnu";
+        lines.push(`- ${from} a remboursé ${to} : ${money(payment.amount)}`);
       });
       lines.push("");
       lines.push("Remboursements :");
@@ -1499,6 +1664,11 @@
     els.tripName.addEventListener("input", event => {
       state.tripName = event.target.value.trim() || defaultState.tripName;
       els.mobileTripTitle.textContent = state.tripName;
+      saveState();
+    });
+
+    els.debtNotes.addEventListener("input", event => {
+      state.debtNotes = event.target.value;
       saveState();
     });
 
@@ -1526,6 +1696,10 @@
 
     els.toggleActivityFormBtn.addEventListener("click", () => {
       setFormExpanded("planning", els.activityFormPanel.hidden);
+    });
+
+    els.togglePaymentFormBtn.addEventListener("click", () => {
+      setFormExpanded("settle", els.paymentFormPanel.hidden);
     });
 
     els.personForm.addEventListener("submit", event => {
@@ -1568,8 +1742,8 @@
         return;
       }
 
-      state.expenses.push({
-        id: crypto.randomUUID(),
+      const expense = {
+        id: els.expenseId.value || crypto.randomUUID(),
         label: els.expenseLabel.value.trim(),
         amount: Math.round(amount * 100) / 100,
         payerId: els.expensePayer.value,
@@ -1577,21 +1751,57 @@
         category: els.expenseCategory.value,
         note: els.expenseNote.value.trim(),
         createdAt: new Date().toISOString()
-      });
+      };
+      const existingIndex = state.expenses.findIndex(item => item.id === expense.id);
+      if (existingIndex >= 0) {
+        expense.createdAt = state.expenses[existingIndex].createdAt;
+        state.expenses[existingIndex] = expense;
+      } else {
+        state.expenses.push(expense);
+      }
 
-      els.expenseForm.reset();
+      const wasEditing = existingIndex >= 0;
+      resetExpenseForm();
       setFormExpanded("expenses", false);
       render();
-      showToast("Dépense ajoutée.");
-      setTab("dashboard");
+      showToast(wasEditing ? "Dépense modifiée." : "Dépense ajoutée.");
+      setTab(wasEditing ? "expenses" : "dashboard");
     });
 
     els.expenseList.addEventListener("click", event => {
-      const button = event.target.closest("[data-delete-expense]");
-      if (!button) return;
-      state.expenses = state.expenses.filter(expense => expense.id !== button.dataset.deleteExpense);
-      render();
-      showToast("Dépense supprimée.");
+      const editButton = event.target.closest("[data-edit-expense]");
+      const deleteButton = event.target.closest("[data-delete-expense]");
+
+      if (editButton) {
+        const expense = state.expenses.find(item => item.id === editButton.dataset.editExpense);
+        if (!expense) return;
+        setFormExpanded("expenses", true);
+        els.expenseId.value = expense.id;
+        els.expenseLabel.value = expense.label;
+        els.expenseAmount.value = expense.amount;
+        els.expensePayer.value = expense.payerId;
+        els.expenseCategory.value = expense.category;
+        els.expenseNote.value = expense.note || "";
+        els.splitChecks.querySelectorAll("input").forEach(input => {
+          input.checked = expense.splitWith.includes(input.value);
+        });
+        els.expenseSubmitBtn.textContent = "Enregistrer les modifications";
+        els.expenseCancelBtn.hidden = false;
+        els.expenseForm.scrollIntoView({ behavior: "smooth", block: "start" });
+        els.expenseLabel.focus({ preventScroll: true });
+      }
+
+      if (deleteButton) {
+        state.expenses = state.expenses.filter(expense => expense.id !== deleteButton.dataset.deleteExpense);
+        resetExpenseForm();
+        render();
+        showToast("Dépense supprimée.");
+      }
+    });
+
+    els.expenseCancelBtn.addEventListener("click", () => {
+      resetExpenseForm();
+      setFormExpanded("expenses", false);
     });
 
     els.activityForm.addEventListener("submit", event => {
@@ -1660,6 +1870,72 @@
       setFormExpanded("planning", false);
     });
 
+    els.settlementList.addEventListener("click", event => {
+      const button = event.target.closest("[data-record-payment]");
+      if (!button) return;
+      setFormExpanded("settle", true);
+      els.paymentFrom.value = button.dataset.from;
+      els.paymentTo.value = button.dataset.to;
+      els.paymentAmount.value = Number(button.dataset.amount).toFixed(2);
+      els.paymentForm.scrollIntoView({ behavior: "smooth", block: "start" });
+      els.paymentAmount.focus({ preventScroll: true });
+    });
+
+    els.paymentForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const fromId = els.paymentFrom.value;
+      const toId = els.paymentTo.value;
+      const amount = Math.round(Number(els.paymentAmount.value) * 100) / 100;
+
+      if (fromId === toId) {
+        showToast("Choisis deux personnes différentes.");
+        return;
+      }
+      if (!Number.isFinite(amount) || amount <= 0) {
+        showToast("Montant invalide.");
+        return;
+      }
+
+      const balances = computeBalances();
+      const fromBalance = Math.round((balances[fromId] || 0) * 100) / 100;
+      const toBalance = Math.round((balances[toId] || 0) * 100) / 100;
+      if (fromBalance >= -0.01) {
+        showToast("Cette personne n'a rien à rembourser.");
+        return;
+      }
+      if (toBalance <= 0.01) {
+        showToast("La personne choisie n'a rien à recevoir.");
+        return;
+      }
+
+      const maximum = Math.round(Math.min(-fromBalance, toBalance) * 100) / 100;
+      if (amount > maximum) {
+        showToast(`Le paiement maximum possible est ${money(maximum)}.`);
+        return;
+      }
+
+      state.payments.push({
+        id: crypto.randomUUID(),
+        fromId,
+        toId,
+        amount,
+        note: els.paymentNote.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+      resetPaymentForm();
+      setFormExpanded("settle", false);
+      render();
+      showToast("Paiement enregistré. Les balances sont à jour.");
+    });
+
+    els.paymentList.addEventListener("click", event => {
+      const button = event.target.closest("[data-delete-payment]");
+      if (!button) return;
+      state.payments = state.payments.filter(payment => payment.id !== button.dataset.deletePayment);
+      render();
+      showToast("Paiement annulé. Les balances ont été recalculées.");
+    });
+
     els.selectAllPeople.addEventListener("click", () => {
       els.splitChecks.querySelectorAll("input").forEach(input => input.checked = true);
     });
@@ -1669,9 +1945,11 @@
     });
 
     els.clearExpensesBtn.addEventListener("click", () => {
-      if (!state.expenses.length) return;
-      if (!confirm("Supprimer toutes les dépenses du voyage ?")) return;
+      if (!state.expenses.length && !state.payments.length) return;
+      if (!confirm("Supprimer toutes les dépenses et tous les paiements enregistrés ?")) return;
       state.expenses = [];
+      state.payments = [];
+      resetExpenseForm();
       render();
       showToast("Historique vidé.");
     });
@@ -1727,7 +2005,9 @@
           tripName: imported.tripName || defaultState.tripName,
           people: imported.people,
           expenses: imported.expenses,
-          activities: Array.isArray(imported.activities) ? imported.activities : []
+          activities: Array.isArray(imported.activities) ? imported.activities : [],
+          payments: Array.isArray(imported.payments) ? imported.payments : [],
+          debtNotes: typeof imported.debtNotes === "string" ? imported.debtNotes : ""
         };
         render();
         showToast("Voyage importé.");
@@ -1738,7 +2018,9 @@
       }
     });
 
+    resetExpenseForm();
     resetActivityForm();
+    resetPaymentForm();
     render();
   </script>
 </body>
