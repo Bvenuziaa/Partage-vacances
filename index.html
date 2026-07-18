@@ -505,6 +505,10 @@
       display: none;
     }
 
+    body.people-tab-hidden [data-tab="people"] {
+      display: none;
+    }
+
     .toast {
       position: fixed;
       right: 18px;
@@ -615,6 +619,10 @@
         padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
         z-index: 8;
         backdrop-filter: blur(12px);
+      }
+
+      body.people-tab-hidden .tabs-mobile {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
       }
 
       .tabs-mobile button {
@@ -806,6 +814,7 @@
           <div class="toolbar">
             <button class="btn primary" type="button" data-open-form="expenses">Ajouter une dépense</button>
             <button class="btn" type="button" data-open-form="planning">Planifier</button>
+            <button class="btn" type="button" id="editPeopleBtn">Modifier les participants</button>
             <button class="btn" type="button" id="shareBtn">Partager le résumé</button>
           </div>
         </div>
@@ -1007,6 +1016,9 @@
             <h2 id="peopleTitle">Participants</h2>
             <p>Garde la liste courte et claire. Tu peux retirer quelqu'un tant qu'il n'a pas de dépense liée.</p>
           </div>
+          <div class="toolbar">
+            <button class="btn primary" type="button" id="savePeopleBtn">Sauvegarder</button>
+          </div>
         </div>
 
         <div class="layout-two">
@@ -1101,7 +1113,8 @@
       expenses: [],
       activities: [],
       payments: [],
-      debtNotes: ""
+      debtNotes: "",
+      peopleTabHidden: false
     };
 
     let state = loadState();
@@ -1110,6 +1123,7 @@
       tripName: document.getElementById("tripName"),
       mobileTripTitle: document.getElementById("mobileTripTitle"),
       navButtons: [...document.querySelectorAll(".nav button[data-tab], .tabs-mobile button[data-tab]")],
+      peopleTabButtons: [...document.querySelectorAll('[data-tab="people"]')],
       sections: [...document.querySelectorAll(".section")],
       navTotal: document.getElementById("navTotal"),
       navExpenses: document.getElementById("navExpenses"),
@@ -1175,7 +1189,9 @@
       paymentMaximum: document.getElementById("paymentMaximum"),
       paymentNote: document.getElementById("paymentNote"),
       paymentList: document.getElementById("paymentList"),
-      debtNotes: document.getElementById("debtNotes")
+      debtNotes: document.getElementById("debtNotes"),
+      editPeopleBtn: document.getElementById("editPeopleBtn"),
+      savePeopleBtn: document.getElementById("savePeopleBtn")
     };
 
     function loadState() {
@@ -1192,7 +1208,8 @@
           expenses: parsed.expenses,
           activities: Array.isArray(parsed.activities) ? parsed.activities : [],
           payments: Array.isArray(parsed.payments) ? parsed.payments : [],
-          debtNotes: typeof parsed.debtNotes === "string" ? parsed.debtNotes : ""
+          debtNotes: typeof parsed.debtNotes === "string" ? parsed.debtNotes : "",
+          peopleTabHidden: parsed.peopleTabHidden === true
         };
       } catch {
         return structuredClone(defaultState);
@@ -1648,11 +1665,18 @@
         : "Aucune dépense pour l'instant.";
     }
 
+    function renderPeopleTabVisibility() {
+      const hidden = state.peopleTabHidden === true;
+      document.body.classList.toggle("people-tab-hidden", hidden);
+      els.peopleTabButtons.forEach(button => button.hidden = hidden);
+    }
+
     function render() {
       els.tripName.value = state.tripName;
       els.mobileTripTitle.textContent = state.tripName;
       els.debtNotes.value = state.debtNotes;
       resizeDebtNotes();
+      renderPeopleTabVisibility();
       renderPersonOptions();
       renderPeople();
       renderExpenses();
@@ -1713,6 +1737,21 @@
 
     els.navButtons.forEach(button => {
       button.addEventListener("click", () => setTab(button.dataset.tab));
+    });
+
+    els.savePeopleBtn.addEventListener("click", () => {
+      state.peopleTabHidden = true;
+      renderPeopleTabVisibility();
+      saveState();
+      setTab("dashboard");
+      showToast("Participants sauvegardés.");
+    });
+
+    els.editPeopleBtn.addEventListener("click", () => {
+      state.peopleTabHidden = false;
+      renderPeopleTabVisibility();
+      saveState();
+      setTab("people");
     });
 
     document.querySelectorAll("[data-open]").forEach(button => {
@@ -2053,7 +2092,8 @@
           expenses: imported.expenses,
           activities: Array.isArray(imported.activities) ? imported.activities : [],
           payments: Array.isArray(imported.payments) ? imported.payments : [],
-          debtNotes: typeof imported.debtNotes === "string" ? imported.debtNotes : ""
+          debtNotes: typeof imported.debtNotes === "string" ? imported.debtNotes : "",
+          peopleTabHidden: imported.peopleTabHidden === true
         };
         render();
         showToast("Voyage importé.");
