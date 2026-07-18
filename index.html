@@ -65,6 +65,10 @@
       gap: 8px;
     }
 
+    .mobile-trip-title {
+      display: none;
+    }
+
     .brand h1 {
       margin: 0;
       font-size: 28px;
@@ -531,6 +535,24 @@
         gap: 12px;
       }
 
+      body:not(.is-dashboard) .sidebar {
+        padding-bottom: 10px;
+      }
+
+      body:not(.is-dashboard) .brand,
+      body:not(.is-dashboard) .trip-card,
+      body:not(.is-dashboard) .side-actions {
+        display: none;
+      }
+
+      body:not(.is-dashboard) .mobile-trip-title {
+        display: block;
+        margin: 0;
+        font-size: 21px;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+      }
+
       .brand h1 {
         font-size: 21px;
       }
@@ -701,9 +723,10 @@
     }
   </style>
 </head>
-<body>
+<body class="is-dashboard">
   <div class="app">
     <aside class="sidebar">
+      <h1 id="mobileTripTitle" class="mobile-trip-title"></h1>
       <div class="brand">
         <h1>Partage Vacances</h1>
         <p>Les dépenses du groupe, les comptes clairs, et moins de calculs à table.</p>
@@ -995,6 +1018,7 @@
 
     const els = {
       tripName: document.getElementById("tripName"),
+      mobileTripTitle: document.getElementById("mobileTripTitle"),
       navButtons: [...document.querySelectorAll(".nav button[data-tab], .tabs-mobile button[data-tab]")],
       sections: [...document.querySelectorAll(".section")],
       navTotal: document.getElementById("navTotal"),
@@ -1177,6 +1201,7 @@
     }
 
     function setTab(tabId) {
+      document.body.classList.toggle("is-dashboard", tabId === "dashboard");
       els.sections.forEach(section => section.classList.toggle("active", section.id === tabId));
       els.navButtons.forEach(button => {
         const selected = button.dataset.tab === tabId;
@@ -1403,6 +1428,7 @@
 
     function render() {
       els.tripName.value = state.tripName;
+      els.mobileTripTitle.textContent = state.tripName;
       renderPersonOptions();
       renderPeople();
       renderExpenses();
@@ -1442,6 +1468,7 @@
 
     els.tripName.addEventListener("input", event => {
       state.tripName = event.target.value.trim() || defaultState.tripName;
+      els.mobileTripTitle.textContent = state.tripName;
       saveState();
     });
 
