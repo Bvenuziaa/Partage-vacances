@@ -517,6 +517,14 @@
       display: none;
     }
 
+    .form-panel[hidden] {
+      display: none;
+    }
+
+    .form-panel[hidden] + .card {
+      grid-column: 1 / -1;
+    }
+
     .fab {
       display: none;
     }
@@ -768,8 +776,8 @@
             <p>Un aperçu rapide de ce que le groupe a dépensé et des comptes de chacun.</p>
           </div>
           <div class="toolbar">
-            <button class="btn primary" type="button" data-open="expenses">Ajouter une dépense</button>
-            <button class="btn" type="button" data-open="planning">Planifier</button>
+            <button class="btn primary" type="button" data-open-form="expenses">Ajouter une dépense</button>
+            <button class="btn" type="button" data-open-form="planning">Planifier</button>
             <button class="btn" type="button" id="shareBtn">Partager le résumé</button>
           </div>
         </div>
@@ -830,10 +838,13 @@
             <h2 id="expensesTitle">Dépenses</h2>
             <p>Ajoute ce qui a été payé, par qui, et pour qui.</p>
           </div>
+          <div class="toolbar">
+            <button class="btn primary" id="toggleExpenseFormBtn" type="button" aria-expanded="false" aria-controls="expenseFormPanel">Ajouter une dépense</button>
+          </div>
         </div>
 
         <div class="layout-two">
-          <div class="card">
+          <div class="card form-panel" id="expenseFormPanel" hidden>
             <form id="expenseForm" class="form">
               <div class="form-grid">
                 <div class="field">
@@ -895,10 +906,13 @@
             <h2 id="planningTitle">Planning</h2>
             <p>Organise les sorties, les repas et les temps de trajet jour par jour.</p>
           </div>
+          <div class="toolbar">
+            <button class="btn primary" id="toggleActivityFormBtn" type="button" aria-expanded="false" aria-controls="activityFormPanel">Ajouter une activité</button>
+          </div>
         </div>
 
         <div class="planning-layout">
-          <div class="card">
+          <div class="card form-panel" id="activityFormPanel" hidden>
             <form id="activityForm" class="form">
               <input id="activityId" type="hidden">
               <div class="field">
@@ -998,7 +1012,7 @@
     </main>
   </div>
 
-  <button class="fab" type="button" data-open="expenses" aria-label="Ajouter une dépense">+</button>
+  <button class="fab" type="button" data-open-form="expenses" aria-label="Ajouter une dépense">+</button>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -1036,6 +1050,8 @@
       balanceList: document.getElementById("balanceList"),
       recentExpenses: document.getElementById("recentExpenses"),
       expenseForm: document.getElementById("expenseForm"),
+      expenseFormPanel: document.getElementById("expenseFormPanel"),
+      toggleExpenseFormBtn: document.getElementById("toggleExpenseFormBtn"),
       expenseLabel: document.getElementById("expenseLabel"),
       expenseAmount: document.getElementById("expenseAmount"),
       expensePayer: document.getElementById("expensePayer"),
@@ -1057,6 +1073,8 @@
       selectNoPeople: document.getElementById("selectNoPeople"),
       clearExpensesBtn: document.getElementById("clearExpensesBtn"),
       activityForm: document.getElementById("activityForm"),
+      activityFormPanel: document.getElementById("activityFormPanel"),
+      toggleActivityFormBtn: document.getElementById("toggleActivityFormBtn"),
       activityId: document.getElementById("activityId"),
       activityTitle: document.getElementById("activityTitle"),
       activityDate: document.getElementById("activityDate"),
@@ -1211,6 +1229,17 @@
         }
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setFormExpanded(kind, expanded) {
+      const isExpense = kind === "expenses";
+      const panel = isExpense ? els.expenseFormPanel : els.activityFormPanel;
+      const button = isExpense ? els.toggleExpenseFormBtn : els.toggleActivityFormBtn;
+      panel.hidden = !expanded;
+      button.setAttribute("aria-expanded", String(expanded));
+      button.textContent = expanded
+        ? "Masquer le formulaire"
+        : isExpense ? "Ajouter une dépense" : "Ajouter une activité";
     }
 
     function escapeHTML(value) {
@@ -1480,6 +1509,24 @@
       button.addEventListener("click", () => setTab(button.dataset.open));
     });
 
+    document.querySelectorAll("[data-open-form]").forEach(button => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.openForm;
+        setTab(target);
+        setFormExpanded(target, true);
+        const field = target === "expenses" ? els.expenseLabel : els.activityTitle;
+        field.focus({ preventScroll: true });
+      });
+    });
+
+    els.toggleExpenseFormBtn.addEventListener("click", () => {
+      setFormExpanded("expenses", els.expenseFormPanel.hidden);
+    });
+
+    els.toggleActivityFormBtn.addEventListener("click", () => {
+      setFormExpanded("planning", els.activityFormPanel.hidden);
+    });
+
     els.personForm.addEventListener("submit", event => {
       event.preventDefault();
       const name = els.personName.value.trim();
@@ -1532,6 +1579,7 @@
       });
 
       els.expenseForm.reset();
+      setFormExpanded("expenses", false);
       render();
       showToast("Dépense ajoutée.");
       setTab("dashboard");
@@ -1571,6 +1619,7 @@
 
       const wasEditing = existingIndex >= 0;
       resetActivityForm();
+      setFormExpanded("planning", false);
       render();
       showToast(wasEditing ? "Activité modifiée." : "Activité ajoutée au planning.");
     });
@@ -1582,6 +1631,7 @@
       if (editButton) {
         const activity = state.activities.find(item => item.id === editButton.dataset.editActivity);
         if (!activity) return;
+        setFormExpanded("planning", true);
         els.activityId.value = activity.id;
         els.activityTitle.value = activity.title;
         els.activityDate.value = activity.date;
@@ -1604,7 +1654,10 @@
       }
     });
 
-    els.activityCancelBtn.addEventListener("click", resetActivityForm);
+    els.activityCancelBtn.addEventListener("click", () => {
+      resetActivityForm();
+      setFormExpanded("planning", false);
+    });
 
     els.selectAllPeople.addEventListener("click", () => {
       els.splitChecks.querySelectorAll("input").forEach(input => input.checked = true);
