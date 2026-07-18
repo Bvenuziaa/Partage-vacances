@@ -7,18 +7,18 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f6f2ea;
-      --ink: #202124;
-      --muted: #686057;
-      --line: #ddd4c5;
-      --panel: #fffaf2;
-      --panel-2: #ece7dc;
-      --accent: #0b6f6a;
+      --bg: #f5f0fa;
+      --ink: #302937;
+      --muted: #746a7b;
+      --line: #ded3e6;
+      --panel: #fffaf0;
+      --panel-2: #eee5f4;
+      --accent: #8060a9;
       --accent-ink: #ffffff;
-      --warm: #b84a32;
-      --good: #176c43;
-      --bad: #a33a2d;
-      --shadow: 0 16px 36px rgba(46, 35, 23, .12);
+      --warm: #c07c65;
+      --good: #4f765f;
+      --bad: #ad4f59;
+      --shadow: 0 16px 36px rgba(70, 49, 88, .11);
       --radius: 8px;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
@@ -52,8 +52,8 @@
     }
 
     .sidebar {
-      background: #29231e;
-      color: #fdf8ef;
+      background: #fff3dc;
+      color: var(--ink);
       padding: 24px;
       display: flex;
       flex-direction: column;
@@ -75,7 +75,7 @@
 
     .brand p {
       margin: 0;
-      color: #d7cbb9;
+      color: var(--muted);
       line-height: 1.45;
     }
 
@@ -94,7 +94,7 @@
     }
 
     .sidebar .trip-card label {
-      color: #d7cbb9;
+      color: var(--muted);
     }
 
     .input,
@@ -115,13 +115,13 @@
     }
 
     .sidebar .input {
-      background: #3a332c;
-      border-color: #574b40;
-      color: #fffaf2;
+      background: #fffaf5;
+      border-color: #d9c9df;
+      color: var(--ink);
     }
 
     .sidebar .input::placeholder {
-      color: #bdaF9d;
+      color: #95869b;
     }
 
     .nav {
@@ -133,7 +133,7 @@
       border: 0;
       border-radius: var(--radius);
       background: transparent;
-      color: #fdf8ef;
+      color: var(--ink);
       text-align: left;
       padding: 12px;
       display: flex;
@@ -142,8 +142,8 @@
     }
 
     .nav button[aria-selected="true"] {
-      background: #fdf8ef;
-      color: #29231e;
+      background: #e9ddf3;
+      color: #4d3567;
     }
 
     .pill {
@@ -156,7 +156,7 @@
     }
 
     .nav button[aria-selected="true"] .pill {
-      background: #e3d8c6;
+      background: #d7c3e8;
     }
 
     .side-actions {
@@ -233,7 +233,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 14px;
     }
 
@@ -312,7 +312,7 @@
       gap: 8px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      background: #fff;
+      background: #fffdf8;
       padding: 9px;
       min-width: 0;
     }
@@ -333,13 +333,14 @@
       border: 1px dashed var(--line);
       border-radius: var(--radius);
       padding: 16px;
-      background: rgba(255, 250, 242, .55);
+      background: rgba(255, 250, 240, .68);
       line-height: 1.45;
     }
 
     .expense,
     .person,
-    .settlement {
+    .settlement,
+    .activity {
       display: grid;
       gap: 8px;
       border-bottom: 1px solid var(--line);
@@ -348,7 +349,8 @@
 
     .expense:last-child,
     .person:last-child,
-    .settlement:last-child {
+    .settlement:last-child,
+    .activity:last-child {
       border-bottom: 0;
       padding-bottom: 0;
     }
@@ -413,6 +415,74 @@
       border-radius: inherit;
     }
 
+    .planning-layout {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .day-group + .day-group {
+      margin-top: 20px;
+    }
+
+    .day-heading {
+      margin: 0;
+      padding-bottom: 9px;
+      border-bottom: 2px solid #d7c3e8;
+      color: #5e4178;
+      font-size: 15px;
+      text-transform: capitalize;
+    }
+
+    .activity {
+      grid-template-columns: 68px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .activity-time {
+      color: #644781;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .activity-content {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .activity-content .row-actions {
+      margin-top: 2px;
+    }
+
+    .category-chip {
+      display: inline-flex;
+      width: fit-content;
+      border-radius: 999px;
+      background: #eadff3;
+      color: #5d3f78;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .next-activity {
+      display: grid;
+      gap: 5px;
+    }
+
+    .next-activity strong {
+      font-size: 17px;
+    }
+
+    .edit-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+
     .tabs-mobile {
       display: none;
     }
@@ -421,8 +491,8 @@
       position: fixed;
       right: 18px;
       bottom: 18px;
-      background: #29231e;
-      color: #fffaf2;
+      background: #5e4178;
+      color: #fffaf5;
       padding: 12px 14px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -489,13 +559,13 @@
 
       .tabs-mobile {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 5px;
         position: fixed;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(246, 242, 234, .96);
+        background: rgba(255, 248, 235, .96);
         border-top: 1px solid var(--line);
         padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
         z-index: 8;
@@ -504,8 +574,8 @@
 
       .tabs-mobile button {
         min-height: 46px;
-        padding: 7px 6px;
-        font-size: 12px;
+        padding: 7px 3px;
+        font-size: 11px;
         border-radius: 10px;
       }
 
@@ -515,6 +585,10 @@
       }
 
       .layout-two {
+        grid-template-columns: 1fr;
+      }
+
+      .planning-layout {
         grid-template-columns: 1fr;
       }
 
@@ -537,7 +611,7 @@
 
       .card {
         padding: 14px;
-        box-shadow: 0 8px 22px rgba(46, 35, 23, .08);
+        box-shadow: 0 8px 22px rgba(70, 49, 88, .08);
       }
 
       .input,
@@ -560,7 +634,7 @@
         border-radius: 50%;
         background: var(--accent);
         color: var(--accent-ink);
-        box-shadow: 0 14px 28px rgba(11, 111, 106, .28);
+        box-shadow: 0 14px 28px rgba(128, 96, 169, .3);
         font-size: 32px;
         line-height: 1;
         z-index: 9;
@@ -603,7 +677,8 @@
 
       .expense,
       .person,
-      .settlement {
+      .settlement,
+      .activity {
         padding: 10px 0;
       }
 
@@ -613,7 +688,15 @@
       }
 
       .tabs-mobile {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .activity {
+        grid-template-columns: 58px minmax(0, 1fr);
+      }
+
+      .edit-actions {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -634,6 +717,7 @@
       <nav class="nav" aria-label="Navigation principale">
         <button type="button" data-tab="dashboard" aria-selected="true">Vue d'ensemble <span class="pill" id="navTotal">0 €</span></button>
         <button type="button" data-tab="expenses" aria-selected="false">Dépenses <span class="pill" id="navExpenses">0</span></button>
+        <button type="button" data-tab="planning" aria-selected="false">Planning <span class="pill" id="navPlanning">0</span></button>
         <button type="button" data-tab="people" aria-selected="false">Participants <span class="pill" id="navPeople">0</span></button>
         <button type="button" data-tab="settle" aria-selected="false">Remboursements <span class="pill" id="navSettle">0</span></button>
       </nav>
@@ -649,6 +733,7 @@
       <div class="tabs-mobile" aria-label="Navigation mobile">
         <button class="btn primary" type="button" data-tab="dashboard">Accueil</button>
         <button class="btn" type="button" data-tab="expenses">Dépenses</button>
+        <button class="btn" type="button" data-tab="planning">Planning</button>
         <button class="btn" type="button" data-tab="people">Amis</button>
         <button class="btn" type="button" data-tab="settle">Soldes</button>
       </div>
@@ -661,6 +746,7 @@
           </div>
           <div class="toolbar">
             <button class="btn primary" type="button" data-open="expenses">Ajouter une dépense</button>
+            <button class="btn" type="button" data-open="planning">Planifier</button>
             <button class="btn" type="button" id="shareBtn">Partager le résumé</button>
           </div>
         </div>
@@ -681,6 +767,11 @@
             <strong id="settlementCount">0</strong>
             <small class="small">Remboursements simplifiés.</small>
           </div>
+          <div class="card stat">
+            <span>Au planning</span>
+            <strong id="activityCount">0</strong>
+            <small class="small" id="nextActivityContext">Aucune activité prévue.</small>
+          </div>
         </div>
 
         <div class="layout-two">
@@ -699,6 +790,14 @@
             </div>
             <div id="recentExpenses" class="list"></div>
           </div>
+        </div>
+
+        <div class="card">
+          <div class="item-head">
+            <strong>Prochaine activité</strong>
+            <button class="btn" type="button" data-open="planning">Voir le planning</button>
+          </div>
+          <div id="nextActivity" class="next-activity"></div>
         </div>
       </section>
 
@@ -767,6 +866,72 @@
         </div>
       </section>
 
+      <section id="planning" class="section" aria-labelledby="planningTitle">
+        <div class="topbar">
+          <div class="title-block">
+            <h2 id="planningTitle">Planning</h2>
+            <p>Organise les sorties, les repas et les temps de trajet jour par jour.</p>
+          </div>
+        </div>
+
+        <div class="planning-layout">
+          <div class="card">
+            <form id="activityForm" class="form">
+              <input id="activityId" type="hidden">
+              <div class="field">
+                <label for="activityTitle">Activité</label>
+                <input id="activityTitle" class="input" type="text" placeholder="Plage, visite, réservation..." maxlength="80" autocomplete="off" enterkeyhint="next" required>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="activityDate">Date</label>
+                  <input id="activityDate" class="input" type="date" required>
+                </div>
+                <div class="field">
+                  <label for="activityCategory">Catégorie</label>
+                  <select id="activityCategory" class="select">
+                    <option>Visite</option>
+                    <option>Repas</option>
+                    <option>Transport</option>
+                    <option>Détente</option>
+                    <option>Sortie</option>
+                    <option>Autre</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="activityStart">Début</label>
+                  <input id="activityStart" class="input" type="time" required>
+                </div>
+                <div class="field">
+                  <label for="activityEnd">Fin <span class="small">(optionnel)</span></label>
+                  <input id="activityEnd" class="input" type="time">
+                </div>
+              </div>
+              <div class="field">
+                <label for="activityLocation">Lieu</label>
+                <input id="activityLocation" class="input" type="text" placeholder="Adresse ou point de rendez-vous" maxlength="100" autocomplete="off" enterkeyhint="next">
+              </div>
+              <div class="field">
+                <label for="activityNote">Note</label>
+                <textarea id="activityNote" class="textarea" placeholder="Réservation, choses à prendre..." maxlength="220" enterkeyhint="done"></textarea>
+              </div>
+              <div class="edit-actions">
+                <button class="btn primary" id="activitySubmitBtn" type="submit">Ajouter au planning</button>
+                <button class="btn" id="activityCancelBtn" type="button" hidden>Annuler</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="item-head">
+              <strong>Programme</strong>
+              <button class="btn danger" type="button" id="clearPlanningBtn">Vider</button>
+            </div>
+            <div id="planningList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
       <section id="people" class="section" aria-labelledby="peopleTitle">
         <div class="topbar">
           <div class="title-block">
@@ -822,7 +987,8 @@
         { id: crypto.randomUUID(), name: "Moi" },
         { id: crypto.randomUUID(), name: "Alex" }
       ],
-      expenses: []
+      expenses: [],
+      activities: []
     };
 
     let state = loadState();
@@ -833,12 +999,16 @@
       sections: [...document.querySelectorAll(".section")],
       navTotal: document.getElementById("navTotal"),
       navExpenses: document.getElementById("navExpenses"),
+      navPlanning: document.getElementById("navPlanning"),
       navPeople: document.getElementById("navPeople"),
       navSettle: document.getElementById("navSettle"),
       totalSpent: document.getElementById("totalSpent"),
       totalContext: document.getElementById("totalContext"),
       averageSpent: document.getElementById("averageSpent"),
       settlementCount: document.getElementById("settlementCount"),
+      activityCount: document.getElementById("activityCount"),
+      nextActivityContext: document.getElementById("nextActivityContext"),
+      nextActivity: document.getElementById("nextActivity"),
       balanceList: document.getElementById("balanceList"),
       recentExpenses: document.getElementById("recentExpenses"),
       expenseForm: document.getElementById("expenseForm"),
@@ -861,7 +1031,20 @@
       importFile: document.getElementById("importFile"),
       selectAllPeople: document.getElementById("selectAllPeople"),
       selectNoPeople: document.getElementById("selectNoPeople"),
-      clearExpensesBtn: document.getElementById("clearExpensesBtn")
+      clearExpensesBtn: document.getElementById("clearExpensesBtn"),
+      activityForm: document.getElementById("activityForm"),
+      activityId: document.getElementById("activityId"),
+      activityTitle: document.getElementById("activityTitle"),
+      activityDate: document.getElementById("activityDate"),
+      activityCategory: document.getElementById("activityCategory"),
+      activityStart: document.getElementById("activityStart"),
+      activityEnd: document.getElementById("activityEnd"),
+      activityLocation: document.getElementById("activityLocation"),
+      activityNote: document.getElementById("activityNote"),
+      activitySubmitBtn: document.getElementById("activitySubmitBtn"),
+      activityCancelBtn: document.getElementById("activityCancelBtn"),
+      planningList: document.getElementById("planningList"),
+      clearPlanningBtn: document.getElementById("clearPlanningBtn")
     };
 
     function loadState() {
@@ -875,7 +1058,8 @@
         return {
           tripName: parsed.tripName || defaultState.tripName,
           people: parsed.people,
-          expenses: parsed.expenses
+          expenses: parsed.expenses,
+          activities: Array.isArray(parsed.activities) ? parsed.activities : []
         };
       } catch {
         return structuredClone(defaultState);
@@ -898,6 +1082,29 @@
         day: "2-digit",
         month: "short"
       }).format(new Date(iso));
+    }
+
+    function todayInputValue() {
+      const now = new Date();
+      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function activityDateLabel(date) {
+      return new Intl.DateTimeFormat("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }).format(new Date(`${date}T12:00:00`));
+    }
+
+    function activityDateTime(activity) {
+      return new Date(`${activity.date}T${activity.start || "00:00"}:00`).getTime();
+    }
+
+    function sortedActivities() {
+      return state.activities.slice().sort((a, b) => activityDateTime(a) - activityDateTime(b));
     }
 
     function getPerson(id) {
@@ -1065,6 +1272,74 @@
       `;
     }
 
+    function activityTemplate(activity) {
+      const time = activity.end ? `${activity.start} – ${activity.end}` : activity.start;
+      return `
+        <article class="activity">
+          <div class="activity-time">${escapeHTML(time)}</div>
+          <div class="activity-content">
+            <div class="item-head">
+              <strong>${escapeHTML(activity.title)}</strong>
+              <span class="category-chip">${escapeHTML(activity.category)}</span>
+            </div>
+            ${activity.location ? `<div class="meta">${escapeHTML(activity.location)}</div>` : ""}
+            ${activity.note ? `<div class="small">${escapeHTML(activity.note)}</div>` : ""}
+            <div class="row-actions">
+              <button class="btn" type="button" data-edit-activity="${activity.id}">Modifier</button>
+              <button class="btn danger" type="button" data-delete-activity="${activity.id}">Supprimer</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderPlanning() {
+      const activities = sortedActivities();
+      els.navPlanning.textContent = String(activities.length);
+      els.activityCount.textContent = String(activities.length);
+
+      if (!activities.length) {
+        els.planningList.innerHTML = `<p class="empty">Aucune activité prévue. Ajoute la première étape du voyage.</p>`;
+      } else {
+        const days = activities.reduce((groups, activity) => {
+          if (!groups[activity.date]) groups[activity.date] = [];
+          groups[activity.date].push(activity);
+          return groups;
+        }, {});
+
+        els.planningList.innerHTML = Object.entries(days).map(([date, dayActivities]) => `
+          <section class="day-group">
+            <h3 class="day-heading">${escapeHTML(activityDateLabel(date))}</h3>
+            <div>${dayActivities.map(activityTemplate).join("")}</div>
+          </section>
+        `).join("");
+      }
+
+      const now = Date.now();
+      const next = activities.find(activity => activityDateTime(activity) >= now);
+      if (!next) {
+        els.nextActivityContext.textContent = activities.length ? "Programme terminé." : "Aucune activité prévue.";
+        els.nextActivity.innerHTML = `<p class="empty">Le prochain rendez-vous du groupe apparaîtra ici.</p>`;
+        return;
+      }
+
+      els.nextActivityContext.textContent = `${activityDateLabel(next.date)} à ${next.start}`;
+      els.nextActivity.innerHTML = `
+        <span class="category-chip">${escapeHTML(next.category)}</span>
+        <strong>${escapeHTML(next.title)}</strong>
+        <span class="meta">${escapeHTML(activityDateLabel(next.date))} · ${escapeHTML(next.start)}${next.end ? ` – ${escapeHTML(next.end)}` : ""}${next.location ? ` · ${escapeHTML(next.location)}` : ""}</span>
+      `;
+    }
+
+    function resetActivityForm() {
+      els.activityForm.reset();
+      els.activityId.value = "";
+      els.activityDate.value = todayInputValue();
+      els.activityStart.value = "09:00";
+      els.activitySubmitBtn.textContent = "Ajouter au planning";
+      els.activityCancelBtn.hidden = true;
+    }
+
     function renderBalances() {
       const balances = computeBalances();
       const maxAbs = Math.max(1, ...Object.values(balances).map(value => Math.abs(value)));
@@ -1133,6 +1408,7 @@
       renderExpenses();
       renderBalances();
       renderSettlements();
+      renderPlanning();
       renderStats();
       saveState();
     }
@@ -1140,6 +1416,13 @@
     function summaryText() {
       const lines = [`${state.tripName}`, ""];
       lines.push(`Total dépensé : ${money(state.expenses.reduce((sum, expense) => sum + expense.amount, 0))}`);
+      lines.push("");
+      lines.push("Planning :");
+      const upcomingActivities = sortedActivities().filter(activity => activityDateTime(activity) >= Date.now()).slice(0, 5);
+      if (!upcomingActivities.length) lines.push("- Aucune activité à venir");
+      upcomingActivities.forEach(activity => {
+        lines.push(`- ${activityDateLabel(activity.date)} à ${activity.start} : ${activity.title}`);
+      });
       lines.push("");
       lines.push("Remboursements :");
       const settlements = computeSettlements();
@@ -1235,6 +1518,67 @@
       showToast("Dépense supprimée.");
     });
 
+    els.activityForm.addEventListener("submit", event => {
+      event.preventDefault();
+      if (els.activityEnd.value && els.activityEnd.value <= els.activityStart.value) {
+        showToast("L'heure de fin doit être après l'heure de début.");
+        return;
+      }
+
+      const activity = {
+        id: els.activityId.value || crypto.randomUUID(),
+        title: els.activityTitle.value.trim(),
+        date: els.activityDate.value,
+        start: els.activityStart.value,
+        end: els.activityEnd.value,
+        category: els.activityCategory.value,
+        location: els.activityLocation.value.trim(),
+        note: els.activityNote.value.trim()
+      };
+      const existingIndex = state.activities.findIndex(item => item.id === activity.id);
+      if (existingIndex >= 0) {
+        state.activities[existingIndex] = activity;
+      } else {
+        state.activities.push(activity);
+      }
+
+      const wasEditing = existingIndex >= 0;
+      resetActivityForm();
+      render();
+      showToast(wasEditing ? "Activité modifiée." : "Activité ajoutée au planning.");
+    });
+
+    els.planningList.addEventListener("click", event => {
+      const editButton = event.target.closest("[data-edit-activity]");
+      const deleteButton = event.target.closest("[data-delete-activity]");
+
+      if (editButton) {
+        const activity = state.activities.find(item => item.id === editButton.dataset.editActivity);
+        if (!activity) return;
+        els.activityId.value = activity.id;
+        els.activityTitle.value = activity.title;
+        els.activityDate.value = activity.date;
+        els.activityStart.value = activity.start;
+        els.activityEnd.value = activity.end || "";
+        els.activityCategory.value = activity.category;
+        els.activityLocation.value = activity.location || "";
+        els.activityNote.value = activity.note || "";
+        els.activitySubmitBtn.textContent = "Enregistrer les modifications";
+        els.activityCancelBtn.hidden = false;
+        els.activityForm.scrollIntoView({ behavior: "smooth", block: "start" });
+        els.activityTitle.focus({ preventScroll: true });
+      }
+
+      if (deleteButton) {
+        state.activities = state.activities.filter(item => item.id !== deleteButton.dataset.deleteActivity);
+        resetActivityForm();
+        render();
+        showToast("Activité supprimée.");
+      }
+    });
+
+    els.activityCancelBtn.addEventListener("click", resetActivityForm);
+
     els.selectAllPeople.addEventListener("click", () => {
       els.splitChecks.querySelectorAll("input").forEach(input => input.checked = true);
     });
@@ -1249,6 +1593,15 @@
       state.expenses = [];
       render();
       showToast("Historique vidé.");
+    });
+
+    els.clearPlanningBtn.addEventListener("click", () => {
+      if (!state.activities.length) return;
+      if (!confirm("Supprimer tout le planning du voyage ?")) return;
+      state.activities = [];
+      resetActivityForm();
+      render();
+      showToast("Planning vidé.");
     });
 
     els.shareBtn.addEventListener("click", async () => {
@@ -1292,7 +1645,8 @@
         state = {
           tripName: imported.tripName || defaultState.tripName,
           people: imported.people,
-          expenses: imported.expenses
+          expenses: imported.expenses,
+          activities: Array.isArray(imported.activities) ? imported.activities : []
         };
         render();
         showToast("Voyage importé.");
@@ -1303,6 +1657,7 @@
       }
     });
 
+    resetActivityForm();
     render();
   </script>
 </body>
